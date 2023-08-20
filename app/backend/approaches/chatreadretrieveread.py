@@ -57,13 +57,23 @@ Search query:
         filter = "category ne '{}'".format(exclude_category.replace("'", "''")) if exclude_category else None
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         prompt = self.query_prompt_template.format(chat_history=self.get_chat_history_as_text(history, include_last_turn=False), question=history[-1]["user"])
-        completion = openai.Completion.create(
-            engine=self.gpt_deployment, 
-            prompt=prompt, 
-            temperature=0.0, 
-            max_tokens=32, 
-            n=1, 
-            stop=["\n"])
+        #text-davinci-003 を gpt-35-turbo へ変更
+        # completion = openai.Completion.create(
+        #     engine=self.gpt_deployment, 
+        #     prompt=prompt, 
+        #     temperature=0.0, 
+        #     max_tokens=32, 
+        #     n=1, 
+        #     stop=["\n"])
+        completion = openai.ChatCompletion.create(
+            deployment_id=self.chatgpt_deployment,
+            messages=messages,
+            temperature=0.0,
+            max_tokens=100, 
+            n=1,
+            stop=["\n"]
+        )
+
         q = completion.choices[0].text
         print(q)
         # STEP 2: Retrieve relevant documents from the search index with the GPT optimized query
